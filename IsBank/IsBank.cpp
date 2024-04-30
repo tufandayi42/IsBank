@@ -1,8 +1,8 @@
-﻿#include <iostream>
-#include <Windows.h>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <string>
 
 using namespace std;
 
@@ -26,17 +26,17 @@ int main() {
         "|_____|___/____/ \\__,_|_| |_|_|\\_\\ \n";
 
     int startSelect;
-    string name, surname;
+    string name, surname, line;
 
     cout << "IsBank'a Hosgeldiniz. \n"
         "_____________________ \n"
-        "1. Hesap Oluştur \n"
+        "1. Hesap Olustur \n"
         "2. Bakiye Sorgu \n"
-        "3. Para Yatır \n"
-        "4. Para Çek \n"
-        "5. Para Gönder \n"
-        "6. Hesabı Sil \n"
-        "7. Çıkış \n";
+        "3. Para Yatir \n"
+        "4. Para Cek \n"
+        "5. Para Gonder \n"
+        "6. Hesabi Sil \n"
+        "7. Cikis \n";
 
     cin >> startSelect;
 
@@ -44,7 +44,7 @@ int main() {
     case 1: {
         cout << "İsminizi girin: \n";
         cin >> name;
-        cout << "Soyisminizi girin: \n ";
+        cout << "Soyisminizi girin: \n";
         cin >> surname;
 
         string accountNumber = generateRandomNumber(12);
@@ -62,10 +62,10 @@ int main() {
             accountFile << "Balance: " << balance << "\n";
             accountFile << "---------------------------\n";
             accountFile.close();
-            cout << "Hesap başarıyla oluşturuldu ve kaydedildi.\n";
+            cout << "Hesap basariyla olusturuldu ve kaydedildi.\n";
         }
         else {
-            cout << "Dosya açılmadı \n";
+            cout << "Dosya acilmadi.\n";
         }
         break;
     }
@@ -76,32 +76,82 @@ int main() {
         cin >> surname;
 
         ifstream inputFile("accounts.txt");
+        if (!inputFile.is_open()) {
+            cout << "Dosya acilmadi!\n";
+            break;
+        }
+
         bool found = false;
-
-        if (inputFile.is_open()) {
-            string currentName, currentSurname;
-            while (getline(inputFile, line)) {
-                if (line.find("Name: ") == 0) {
-                    currentName = line.substr(6);
-                }
-                else if (line.find("Surname: ") == 0) {
-                    currentSurname = line.substr(10);
-                }
-                else if (line.find("Balance: ") == 0 && currentName == name && currentSurname == surname) {
-                    string balanceStr = line.substr(9);
-                    cout << "Bakiyeniz: " << balanceStr << endl;
-                    found = true;
-                    break;
-                }
+        string currentName, currentSurname;
+        while (getline(inputFile, line)) {
+            if (line.find("Name: ") == 0) {
+                currentName = line.substr(7);
             }
-            inputFile.close();
-
-            if (!found) {
-                cout << "Hesap bulunamadı" << endl;
+            else if (line.find("Surname: ") == 0) {
+                currentSurname = line.substr(11);
+            }
+            else if (line.find("Balance: ") == 0 && currentName == name && currentSurname == surname) {
+                cout << "Bakiyeniz: " << line.substr(9) << endl;
+                found = true;
             }
         }
+        inputFile.close();
+
+        if (!found) {
+            cout << "Hesap bulunamadi\n";
+        }
+        break;
+    }
+    case 3: {
+        cout << "İsminizi girin: \n";
+        cin >> name;
+        cout << "Soyisminizi girin: \n";
+        cin >> surname;
+
+        ifstream inputFile("accounts.txt");
+        if (!inputFile.is_open()) {
+            cout << "Dosya acilmadi!\n";
+            break;
+        }
+
+        // Bakiyeyi güncellemek için hesabı bulmalıyız
+        bool found = false;
+        stringstream newContent;
+        string currentName, currentSurname;
+        while (getline(inputFile, line)) {
+            if (line.find("Name: ") == 0) {
+                currentName = line.substr(7);
+            }
+            else if (line.find("Surname: ") == 0) {
+                currentSurname = line.substr(11);
+            }
+
+            newContent << line << "\n";
+
+            if (currentName == name && currentSurname == surname) {
+                if (line.find("Balance: ") == 0) {
+                    int currentBalance = stoi(line.substr(9));
+                    int amount;
+                    cout << "Yatirmak istediginiz miktari girin: \n";
+                    cin >> amount;
+
+                    currentBalance += amount;
+                    newContent << "Balance: " << currentBalance << "\n";
+                    found = true;
+                }
+            }
+        }
+
+        inputFile.close();
+
+        if (found) {
+            ofstream outputFile("accounts.txt");
+            outputFile << newContent.str();
+            outputFile.close();
+            cout << "Bakiye basariyla guncellendi.\n";
+        }
         else {
-            cout << "Dosya acilamadi" << endl;
+            cout << "Hesap bulunamadi.\n";
         }
         break;
     }
@@ -109,7 +159,6 @@ int main() {
         cout << "Gecersiz secim.\n";
         break;
     }
-
 
     return 0;
 }
