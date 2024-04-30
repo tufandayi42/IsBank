@@ -186,12 +186,18 @@ int main() {
                 if (line.find("Balance: ") == 0) {
                     int currentBalance = stoi(line.substr(9));
                     int amount;
-                    cout << "Cekmek İstediginiz Miktari Girin: \n";
+                    cout << "Cekmek istediginiz Miktari Girin: \n";
                     cin >> amount;
 
-                    currentBalance -= amount;
-                    newContent << "Balance: " << currentBalance << "\n";
-                    found = true;
+                    if(currentBalance < amount) {
+                        cout << "Islem basarisiz." << "\n";
+                        return 0;
+                    } else {
+                        currentBalance -= amount;
+                        newContent << "Balance: " << currentBalance << "\n";
+                        found = true;
+                        return 0;
+                    }
                 }
             }
         }
